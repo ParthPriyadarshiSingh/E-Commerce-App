@@ -16,7 +16,6 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-
 import Colors from "../constants/Colors";
 import { HomeScreenNavigationProp } from "../types/Navigation";
 import { Item } from "../types/Item";
@@ -51,7 +50,6 @@ const HomeScreen = ({ navigation }: Props) => {
   const [filterVisible, setFilterVisible] = useState(false);
   const [sortVisible, setSortVisible] = useState(false);
   const [isSorting, setIsSorting] = useState(false);
-  const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Item[]>([]);
 
   useEffect(() => {
@@ -161,7 +159,6 @@ const HomeScreen = ({ navigation }: Props) => {
   };
 
   const handleChange = (text: string) => {
-    setQuery(text);
     const lowercasedQuery = text.toLowerCase();
     const filtered = products.filter((product) =>
       product.title.toLowerCase().includes(lowercasedQuery)
@@ -169,13 +166,22 @@ const HomeScreen = ({ navigation }: Props) => {
     setSearchResults(filtered);
   };
 
-  const renderSearchResult = (item: Item, index: number) => (
+  const renderSearchResult = ({
+    item,
+    index,
+  }: {
+    item: Item;
+    index: number;
+  }) => (
     <TouchableOpacity
       style={[
         styles.searchResult,
         { borderBottomWidth: index === searchResults.length - 1 ? 0 : 1 },
       ]}
-      onPress={() => navigation.navigate("Product", { product: item })}
+      onPress={() => {
+        navigation.push("Product", { product: item });
+        console.log(`Navigating to product with id: ${item.id}`);
+      }}
     >
       <Text style={styles.searchItemTitle}>{item.title}</Text>
       <Text style={styles.searchItemPrice}>₹{item.price}</Text>
@@ -207,7 +213,7 @@ const HomeScreen = ({ navigation }: Props) => {
         <View style={styles.searchResultContainer}>
           <FlatList
             data={searchResults}
-            renderItem={({ item, index }) => renderSearchResult(item, index)}
+            renderItem={renderSearchResult}
             keyExtractor={(item) => String(item.id)}
           />
         </View>
@@ -334,6 +340,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderColor: Colors.primary,
     paddingHorizontal: 20,
+    zIndex: 50,
   },
   searchItemTitle: {
     fontSize: 0.04 * windowWidth,
